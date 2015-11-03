@@ -1,0 +1,11 @@
+{
+    "name": "Quest for the Keys",
+    "icon": "icon.png",
+    "levels: ["level-1.lev", "level-2.lev", "level-3.lev", "level-4.lev", 
+              "level-5.lev", "level-6.lev", "level-7.lev"],
+    "physics": {
+        "fps": 24,
+        "gravity": 2.5,
+        "particle_gravity": 1.25
+    }
+}

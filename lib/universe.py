@@ -1,0 +1,2 @@
+class StandardUniverse(object):
+    pass

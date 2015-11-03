@@ -1,0 +1,88 @@
+"""
+WWSSSWWWWWWWWWWWWWWW
+W        WW   W W  W
+W      W  W     W  W
+W W         WW     S
+W    W    WWW   W  W
+W                  W
+W       W        W W
+W   WW       WWW   W
+WW                 W
+W        W        WW
+W  WWW          W  W
+WW             WW  W
+W    W    WWW      W
+S                  W
+S  W   WW         WW
+S     WW W        WW
+S     WW  W        W
+S     W    WWWW    W
+S  W         B     B
+WWWWW   W WWWWWWWWWW
+""" -> map_data
+level.parse_map(20, 20, map_data) -> map_array
+
+
+@event("setup")
+    level.set_tileset('brown')
+    level.load_map(map_array)
+    
+    player.load([15.50, 18.55])
+    
+    enemies.new("spider", [17.50, 15.00], orientation:RIGHT)
+    enemies.new("spider", [15.00, 6.50], orientation:DOWN)
+    enemies.new("spider", [2.50, 8.50], orientation:LEFT)
+    
+    objects.new("key", [12.50, 18.50])
+    objects.new("lever", [18.50, 8.50], uses=1, command:level.rotate)
+    objects.new("lever", [8.50, 1.50], uses=1, command:level.rotate)
+    objects.new("lever", [3.50, 11.50], uses=1, command:level.rotate)
+    objects.new("lever", [9.50, 19.50], uses=1, command:level.rotate)
+@end
+
+
+@event("start")
+    player.set_animation("sleep")
+    player.speech("Zzz...")
+    player.set_animation("default")
+    player.speech("...uh, g'morning.")
+    player.speech("Where am I?")
+    player.speech("...")
+    player.speech("I guess I really need to lay off the booze.")
+    player.speech("I remember something about a key... and some sort of an experiment.")
+    player.face(LEFT)
+    player.speech("And it seems like my key has slid behind those bars.")
+    player.speech("Slippery rascal. If only I could reach it...")
+    player.walk(LEFT, 5)
+    player.speech("...")
+    player.speech("Blasted 2D world. Platforming really isn't my thing.")
+    player.speech("I'm more like a shooter guy.")
+    player.walk(RIGHT, 4)
+    player.speech("But if I really have to, I guess I could try the lever up there.")
+    player.speech("You there with the controls, just lay your hand on the arrow keys.")
+    player.speech("I jump with the up arrow or Z. Hold it longer, and I'll jump higher.")
+    player.speech("You can also use it to slow down falls.")
+    player.speech("Collect stuff and pull levers with the down arrow. Got it now?")
+    player.speech("Oh, and stay clear of dangers.")
+    player.speech("Like, if there are sharp spikes on the floor, don't make me jump on them.")
+    player.speech("I can take a few hits, but I'm not the kind of guy that likes pain.")
+    player.speech("So just be careful. Please.")
+@end
+
+
+@event("activation", item_type:"lever")
+    player.speech("Whoa!")
+    player.speech("That was sort of unexpected.")
+    player.speech("But I guess I can use it to my advantage.")
+    player.speech("This lever seems to have broken, but I wonder what the next one up there does?")
+@end
+
+@event("activation", item_type:"key")
+    player.speech("Finally!")
+    player.speech("...")
+    player.speech("Hey, what is this?")
+    player.speech("This key doesn't fit that door after all. Now what?")
+    player.speech("...")
+    player.speech("I guess I'll just have to go to the next level.")
+    level.next()
+@end
