@@ -1,11 +1,12 @@
 import os
 import codecs
 
+import pytmx
 import pygame
 from pygame.locals import *
 
 from .locals import *
-from .data import levelpath
+from .data import levelpath, filepath
 from .util import dir_from_str, all_collided, get_edges
 from .log import error_message, log_message
 from .tile import Tile
@@ -26,8 +27,19 @@ class Change:
         self.coords = coords
 
 
-class Level:
+class UnknownTileException(Exception):
+    pass
 
+
+def get_tile_type(path):
+    base = os.path.basename(path)
+    for keyword in TILE_TYPE_MAP:
+        if keyword in base:
+            return TILE_TYPE_MAP[keyword]
+    raise UnknownTileException(path)
+
+
+class Level:
     def __init__(self, screen, character, level_name="w0-l0"):
         self.screen = screen
         self.image = None
@@ -84,41 +96,57 @@ class Level:
                         else:
                             current_event.add_element(line)
                         continue
+
                     elif values[0] == "trigger":
                         trigger = True
                         current_event = Scripted_event(values[1], int(values[2]))
                         self.scripted_events.append(current_event)
                         continue
-                    elif values[0] == "tiles":
-                        parse_tiles = True
-                        continue
+
                     elif values[0] == "set":
+                        # Original tileset declaration
                         self.set = values[1]
                         continue
 
+                    elif values[0] == "tiles":
+                        # Original tilemap header
+                        if len(values) == 1:
+                            parse_tiles = True
+                            continue
+
+                        # Parse a TMX
+                        path = filepath(line.split(None, 1)[1].strip())
+                        tmx = pytmx.pytmx.TiledMap(path)
+                        for x, y, image in tmx.layers[0].tiles():
+                            tile_type = get_tile_type(image[0])
+                            self.add_tile(tile_type, (x, y))
+                        self.set = tmx.tilesets[0].name
+                        continue
+
+
                     #Parsing objects
                     x, y = tile_coords_to_screen_coords(values[1], values[2])
+
                     if values[0] == "player":
                         self.player = Player(self.screen, character, x, y)
-                        continue
+
                     elif values[0] == "spider":
                         self.objects.append(Spider( self.screen, x, y, dir_from_str(values[3]) ))
-                        continue
+
                     elif values[0] == "blob":
                         self.objects.append(Blob(self.screen, x, y, self.player))
-                        continue
+
                     elif values[0] == "lever":
                         trigger_type = TRIGGER_FLIP
                         if values[4] == "TRIGGER_FLIP":
                             trigger_type = TRIGGER_FLIP
                         self.objects.append( Item(self.screen, x, y, self.set, values[0], int(values[3]), trigger_type) )
-                        continue
+
                     else:
                         try:
                             self.objects.append(Item(self.screen, x, y, self.set, values[0]))
                         except:
                             error_message("Couldn't add object '" + values[0] + "'")
-                        continue
 
         self.dust_color = COLOR_DUST[self.set]
 
@@ -235,43 +263,43 @@ class Level:
         # Hack to avoid jitter
         rcopy.height += 1
         rcopy.width += 1
-        
+
         for t in self.active_tiles:
             if not t.is_aligned():
-                # Sometimes collisions were misdetected just after the level 
+                # Sometimes collisions were misdetected just after the level
                 # was flipped, so this is an extra check to avoid that.
-                # Should look into the order things are done when 
+                # Should look into the order things are done when
                 # flipping to fix the problem properly
                 continue
-            
+
             overlap = t.rect.clip(rcopy)
             if not overlap:
               continue
-            
+
             tx, ty = t.tilex, t.tiley
-            
+
             edges = get_edges(t.rect)
             right_edge = edges[RIGHT]
             left_edge = edges[LEFT]
             bottom_edge = edges[DOWN]
             top_edge = edges[UP]
-            
-            # Edges are of the tile, so we invert to get the orientation as 
+
+            # Edges are of the tile, so we invert to get the orientation as
             # pertaining to the passed rect
             col_top = rcopy.colliderect(bottom_edge) and not self.find_tile(tx, ty + 1)
             col_bottom = rcopy.colliderect(top_edge) and not self.find_tile(tx, ty - 1)
             col_left = rcopy.colliderect(right_edge) and not self.find_tile(tx + 1, ty)
             col_right = rcopy.colliderect(left_edge) and not self.find_tile(tx - 1, ty)
-            
+
             col_hside = col_top or col_bottom
             col_vside = col_left or col_right
-            
+
             can_hcol = not col_hside or not dy or overlap.width < overlap.height
             if dx > 0 and col_right and can_hcol:
                 collision[RIGHT] = t.rect.left
             elif dx < 0 and col_left and can_hcol:
                 collision[LEFT] = t.rect.right
-            
+
             can_vcol = not col_vside or not dx or overlap.width >= overlap.height
             if dy >= 0 and col_bottom and can_vcol:
                 collision[DOWN] = t.rect.top
@@ -281,7 +309,7 @@ class Level:
                     collision[DAMAGE] = 0
             elif dy < 0 and col_top and can_vcol:
                 collision[UP] = t.rect.bottom
-        
+
         return collision
 
 
@@ -291,37 +319,37 @@ class Level:
         """
         if change == None:
             return
-        
+
         log_message("Made change %s to coords %s, %s" % (
                      change.tile_change, change.coords[0], change.coords[1])
                     )
-        
+
         if (change.tile_change == "remove"):
             self.remove_tile(change.coords)
-        
+
         elif change.tile_change in "WBS":
             self.remove_tile(change.coords)
-            change.coords = (change.coords[0] + FULL_TILES_HOR - TILES_HOR, 
+            change.coords = (change.coords[0] + FULL_TILES_HOR - TILES_HOR,
                              change.coords[1] + FULL_TILES_VER - TILES_VER)
             self.add_tile(change.tile_change, change.coords)
             self.reset_active_tiles()
-    
+
     def remove_tile(self, coords):
         """
-        Remove a tile from the level with coordinates relative to the corner of 
+        Remove a tile from the level with coordinates relative to the corner of
         the area currently visible.
         """
         for t in self.active_tiles:
-            if t.rect.collidepoint(coords[0] * TILE_DIM + TILE_DIM / 2, 
+            if t.rect.collidepoint(coords[0] * TILE_DIM + TILE_DIM / 2,
                                    coords[1]*TILE_DIM + TILE_DIM / 2):
                 self.active_tiles.remove(t)
                 self.tiles.remove(t)
                 self.edited = True
-    
-    
+
+
     def add_tile(self, tile_type, coords):
         """
-        Add a tile to the level with absolute coordinates in the current 
+        Add a tile to the level with absolute coordinates in the current
         rotation state.
         """
         new_tile = None
@@ -334,7 +362,7 @@ class Level:
         if new_tile != None:
             self.tiles.append(new_tile)
         self.edited = True
-    
+
     def find_tile(self, tilex, tiley):
         for t in self.tiles:
             if t.tilex == tilex and t.tiley == tiley:

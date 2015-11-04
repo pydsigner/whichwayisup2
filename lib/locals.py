@@ -17,6 +17,8 @@ FULL_TILES_VER = 20
 TILES_HOR = 13
 TILES_VER = 13
 
+TILE_TYPE_MAP = {'wall': 'W', 'bar': 'B', 'spike': 'S'}
+
 TILE_DIM = MULT(40)
 
 PLAY_AREA_CENTER_X = (-FULL_TILES_HOR / 2 + TILES_HOR) * TILE_DIM

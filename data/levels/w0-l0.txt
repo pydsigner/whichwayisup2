@@ -1,26 +1,4 @@
-set brown
-
-tiles
-WWSSSWWWWWWWWWWWWWWW
-W        WW   W W  W
-W      W  W     W  W
-W W         WW     S
-W    W    WWW   W  W
-W                  W
-W       W        W W
-W   WW       WWW   W
-WW                 W
-W        W        WW
-W  WWW          W  W
-WW             WW  W
-W    W    WWW      W
-S                  W
-S  W   WW         WW
-S     WW W        WW
-S     WW  W        W
-S     W    WWWW    W
-S  W         B     B
-WWWWW   W WWWWWWWWWW
+tiles levels/w0-l0.tmx
 
 key 12.5 18.5
 lever 18.5 8.5 1 TRIGGER_FLIP
