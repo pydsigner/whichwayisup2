@@ -1,37 +1,35 @@
 Which Way is Up? README
 =======================
 
-You're playing version Beta 0.7.9.
+You're playing version Beta 2.0.0pre.
 
 
 
 CREDITS & CONTACT:
 
-Main developer: Olli Etuaho
+Current developer: Daniel Foerster (pydsigner)
+
+----
+
+Original developer: Olli Etuaho
 Home page: http://www.hectigo.net/
 E-mail: admin at hectigo.net
 
-Debian package maintained by: Miriam Ruiz
-Home page: http://www.miriamruiz.es/weblog/
-E-mail: webmistress at miriamruiz.es
-
-
+----
 
 DEPENDENCIES:
 
 You might need to install some of these before running the game.
-The dependencies are for the Python source code version - they are not needed
-for running the Windows binary.
 
   Python:     http://www.python.org/
   PyGame:     http://www.pygame.org/
+  PyTMX
 
 
 
 RUNNING THE GAME:
 
 On Windows or Mac OS X, locate the "run_game.py" file and double-click it.
-If you're using the Windows binary, double-click on main.exe.
 
 Otherwise open a terminal / console and "cd" to the game directory and run:
 
@@ -47,12 +45,11 @@ Controls reference:
 
 KEYBOARD:
 
-Left/Right       Move
-Z or Up          Advance game dialogue
-                 Jump - the longer you hold down the button,
-                 the higher the character jumps
-Down             Interact with the environment, pick up objects
-P                Pause game
+Left/Right or A/D       Move
+Z or Up or W            Advance game dialogue
+                        Jump - the longer you hold down the button, the higher the character jumps
+Down or S               Interact with the environment, pick up objects
+P or Pause              Pause game
 
 JOYSTICK OR GAMEPAD WITH 2 OR MORE BUTTONS:
 
@@ -80,18 +77,8 @@ Enter/Z/Button 1 or 2  Choose menu option
 
 Oh, and one more thing - if you don't find the game challenging enough as it
 is, try maximize your score by getting through it without losing any health
-at all. This could be damn hard at some points, but it's always possible!
+at all. This could be hard at some points, but it's always possible!
 Improving speed records also provides some additional challenge.
-
-
-
-KNOWN BUGS/ISSUES:
-
-- Some minor collision detection related bugs and annoyances -
-  especially regarding corner-to-corner-collisions.
-- The player may get stuck if jumping over the top when the level is
-  about to rotate.
-
 
 
 SPEEDRUNNING:
@@ -120,18 +107,17 @@ data/levels/creating_levels.txt
 The game saves unlock data etc. to the user's home directory.
 
 In Linux, this is usually:
-~/.wwisup
+~/.wwisup2
 
 In Windows XP/2000, this is usually:
-C:\Documents and Settings\User\Application Data\Wwisup
+C:\Documents and Settings\User\Application Data\Wwisup2
 
 COMMAND LINE PARAMETERS:
 
 -l level_name           Start up from the level specified.
 -v                      Verbose mode - error messages appear in the console,
                         not just the log file.
--dev                    Developer mode. Enables editing the official levels
-                        and also activates verbose mode automatically.
+-dev                    Developer mode. Activates verbose mode automatically.
 
 DEVELOPER KEYBOARD COMMANDS:
 
